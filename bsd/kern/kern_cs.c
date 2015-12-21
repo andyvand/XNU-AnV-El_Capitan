@@ -154,8 +154,8 @@ cs_invalid_page(
 	proc_lock(p);
 
 	/* XXX for testing */
-	p->p_csflags ~= CS_KILL;
-	p->p_csflags ~= CS_HARD;
+        p->p_csflags ~= CS_KILL;
+        p->p_csflags ~= CS_HARD;
 
 	/* CS_KILL triggers a kill signal, and no you can't have the page. Nothing else. */
 	/*if (p->p_csflags & CS_KILL) {
