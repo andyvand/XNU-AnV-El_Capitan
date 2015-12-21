@@ -71,14 +71,20 @@
 
 #include <mach/shared_region.h>
 
+#include <libkern/section_keywords.h>
+
 unsigned long cs_procs_killed = 0;
 unsigned long cs_procs_invalidated = 0;
 
 int cs_force_kill = 0;
 int cs_force_hard = 0;
 int cs_debug = 0;
-int cs_enforcement_panic=0;
-int cs_enforcement_enable = 0;
+const int cs_enforcement_enable = 0;
+const int cs_library_val_enable = 0;
+
+#define DEFAULT_CS_ENFORCEMENT_ENABLE 0
+#define DEFAULT_CS_LIBRARY_VA_ENABLE 0
+
 int cs_library_val_enable = 0;
 int cs_all_vnodes = 0;
 

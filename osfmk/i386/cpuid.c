@@ -1169,23 +1169,44 @@ cpuid_set_generic_info(i386_cpu_info_t *info_p)
 		 * Leaf7 Features:
 		 */
 		if (IsIntelCPU())
- 		{
+  		{
 			cpuid_fn(0x7, reg);
 			info_p->cpuid_leaf7_features = quad(reg[ecx], reg[ebx]);
+		} else {
+			info_p->cpuid_leaf7_features = 0;
 		}
 
 		DBG(" Feature Leaf7:\n");
 		DBG("  EBX           : 0x%x\n", reg[ebx]);
 		DBG("  ECX           : 0x%x\n", reg[ecx]);
-	} else {
-		info_p->cpuid_leaf7_features = 0;
 	}
+
+	if (info_p->cpuid_max_basic >= 0x15) {
+		/*
+		 * TCS/CCC frequency leaf:
+		 */
+		if (IsIntelCPU())
+  		{
+			cpuid_fn(0x15, reg);
+			info_p->cpuid_tsc_leaf.denominator = reg[eax];
+			info_p->cpuid_tsc_leaf.numerator   = reg[ebx];
+		} else {
+			info_p->cpuid_tsc_leaf.denominator = 0;
+			info_p->cpuid_tsc_leaf.numerator   = 0;
+		}
+
+		DBG(" TSC/CCC Information Leaf:\n");
+		DBG("  numerator     : 0x%x\n", reg[ebx]);
+		DBG("  denominator   : 0x%x\n", reg[eax]);
+	}
+
+	return;
 }
 
 static uint32_t
 cpuid_set_cpufamily(i386_cpu_info_t *info_p)
 {
-	uint32_t cpufamily = CPUFAMILY_INTEL_MEROM;
+    uint32_t cpufamily = CPUFAMILY_INTEL_MEROM;
 
     if (IsIntelCPU())
     {
@@ -1226,6 +1247,10 @@ cpuid_set_cpufamily(i386_cpu_info_t *info_p)
 		case CPUID_MODEL_BROADWELL:
 		case CPUID_MODEL_BRYSTALWELL:
 			cpufamily = CPUFAMILY_INTEL_BROADWELL;
+			break;
+		case CPUID_MODEL_SKYLAKE:
+		case CPUID_MODEL_SKYLAKE_DT:
+			cpufamily = CPUFAMILY_INTEL_SKYLAKE;
 			break;
 		}
 		break;
@@ -1496,6 +1521,14 @@ leaf7_feature_map[] = {
 	{CPUID_LEAF7_FEATURE_SMAP,     "SMAP"},
 	{CPUID_LEAF7_FEATURE_RDSEED,   "RDSEED"},
 	{CPUID_LEAF7_FEATURE_ADX,      "ADX"},
+	{CPUID_LEAF7_FEATURE_IPT,      "IPT"},
+	{CPUID_LEAF7_FEATURE_SGX,      "SGX"},
+	{CPUID_LEAF7_FEATURE_PQM,      "PQM"},
+	{CPUID_LEAF7_FEATURE_FPU_CSDS, "FPU_CSDS"},
+	{CPUID_LEAF7_FEATURE_MPX,      "MPX"},
+	{CPUID_LEAF7_FEATURE_PQE,      "PQE"},
+	{CPUID_LEAF7_FEATURE_CLFSOPT,  "CLFSOPT"},
+	{CPUID_LEAF7_FEATURE_SHA,      "SHA"},
 	{0, 0}
 };
 

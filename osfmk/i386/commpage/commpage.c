@@ -307,12 +307,17 @@ commpage_init_cpu_capabilities( void )
 	setif(bits, kHasADX,     cpuid_features() &
 					CPUID_LEAF7_FEATURE_ADX);
 	
-	uint64_t misc_enable = 0;
+	setif(bits, kHasMPX,     cpuid_leaf7_features() &
+					CPUID_LEAF7_FEATURE_MPX);
+	setif(bits, kHasSGX,     cpuid_leaf7_features() &
+					CPUID_LEAF7_FEATURE_SGX);
 
-	if (IsIntelCPU())
-	{
-		misc_enable = rdmsr64(MSR_IA32_MISC_ENABLE);
-	}
+	uint64_t misc_enable = 0;
+ 
+ 	if (IsIntelCPU())
+ 	{
+ 		misc_enable = rdmsr64(MSR_IA32_MISC_ENABLE);
+ 	}
 
 	setif(bits, kHasENFSTRG, (misc_enable & 1ULL) &&
 				 (cpuid_leaf7_features() &
