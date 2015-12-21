@@ -80,11 +80,14 @@ int cs_force_kill = 0;
 int cs_force_hard = 0;
 int cs_debug = 0;
 int cs_enforcement_enable = 0;
+int cs_enforcement_panic = 0;
 int cs_library_val_enable = 0;
-int cs_all_vnodes = 0;
 
 #define DEFAULT_CS_ENFORCEMENT_ENABLE 0
 #define DEFAULT_CS_LIBRARY_VA_ENABLE 0
+
+//int cs_library_val_enable = 0;
+int cs_all_vnodes = 0;
 
 static lck_grp_t *cs_lockgrp;
 
@@ -154,8 +157,8 @@ cs_invalid_page(
 	proc_lock(p);
 
 	/* XXX for testing */
-        p->p_csflags ~= CS_KILL;
-        p->p_csflags ~= CS_HARD;
+	p->p_csflags |= CS_KILL;
+	p->p_csflags |= CS_HARD;
 
 	/* CS_KILL triggers a kill signal, and no you can't have the page. Nothing else. */
 	/*if (p->p_csflags & CS_KILL) {

@@ -3359,9 +3359,9 @@ cs_validate_page(
 	memory_object_t __unused	pager,
 	memory_object_offset_t __unused	page_offset,
 	const void __unused	*data,
-	boolean_t	*tainted)
+	unsigned	*tainted)
 {
-    *tainted = FALSE;
+    *tainted = 0;
     return TRUE;
 }
 
