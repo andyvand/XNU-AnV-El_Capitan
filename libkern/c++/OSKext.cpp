@@ -2083,15 +2083,6 @@ OSKext::setInfoDictionaryAndPath(
         }
     }
     
-    /* Check to see if this kext is in exclude list */
-    if ( isInExcludeList() ) {
-        OSKextLog(this,
-                  kOSKextLogErrorLevel | kOSKextLogGeneralFlag,
-                  "Kext %s is in exclude list, not loadable",
-                  getIdentifierCString());
-        goto finish;
-    }
-
    /* Set flags for later use if the infoDict gets flushed. We only
     * check for true values, not false ones(!)
     */
@@ -4162,16 +4153,6 @@ OSKext::loadKextWithIdentifier(
                 kextIdentifier->getCStringNoCopy());
              goto finish;
         }
-        
-        if (!sKernelRequestsEnabled) {
-            OSKextLog(theKext,
-                kOSKextLogErrorLevel |
-                kOSKextLogLoadFlag,
-                "Can't load kext %s - requests to user space are disabled.",
-                kextIdentifier->getCStringNoCopy());
-            result = kOSKextReturnDisabled;
-            goto finish;
-        }
 
        /* Create a new request unless one is already sitting
         * in sKernelRequests for this bundle identifier
@@ -4314,17 +4295,6 @@ OSKext::load(
     Boolean              alreadyLoaded                = false;
     OSKext             * lastLoadedKext               = NULL;
 
-    if (isInExcludeList()) {
-        OSKextLog(this,
-                  kOSKextLogErrorLevel | kOSKextLogGeneralFlag |
-                  kOSKextLogLoadFlag,
-                  "Kext %s is in exclude list, not loadable",
-                  getIdentifierCString());
-        
-        result = kOSKextReturnNotLoadable;
-        goto finish;
-    }
-
     if (isLoaded()) {
         alreadyLoaded = true;
         result = kOSReturnSuccess;
@@ -4356,29 +4326,6 @@ OSKext::load(
         }
    }
 #endif
-
-    if (!sLoadEnabled) {
-        OSKextLog(this,
-            kOSKextLogErrorLevel |
-            kOSKextLogLoadFlag,
-            "Kext loading is disabled (attempt to load kext %s).",
-            getIdentifierCString());
-        result = kOSKextReturnDisabled;
-        goto finish;
-    }
-
-   /* If we've pushed the next available load tag to the invalid value,
-    * we can't load any more kexts.
-    */
-    if (sNextLoadTag == kOSKextInvalidLoadTag) {
-        OSKextLog(this,
-            kOSKextLogErrorLevel |
-            kOSKextLogLoadFlag,
-            "Can't load kext %s - no more load tags to assign.",
-            getIdentifierCString());
-        result = kOSKextReturnNoResources;
-        goto finish;
-    }
 
    /* This is a bit of a hack, because we shouldn't be handling 
     * personalities within the load function.
@@ -4577,7 +4524,7 @@ loaded:
     * This is a bit of a hack, because we shouldn't be handling 
     * personalities within the load function.
     */
-    if (result == kOSReturnSuccess && startMatchingOpt == kOSKextExcludeNone) {
+    if (result == kOSReturnSuccess) {
         result = sendPersonalitiesToCatalog(true, personalityNames);
     }
 
